@@ -120,6 +120,15 @@
             "TargetChat"
           ],
           "layout": "TwoColumnsMidExpanded"
+        },
+        {
+          "name": "ChatMessageHistory",
+          "pattern": "ChatMessageHistory/{conversationId}",
+          "target": [
+            "TargetChatHistory",
+            "TargetChatMessageHistory"
+          ],
+          "layout": "TwoColumnsMidExpanded"
         }
       ],
       "targets": {

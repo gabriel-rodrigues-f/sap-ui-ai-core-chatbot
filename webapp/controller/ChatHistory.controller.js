@@ -11,33 +11,25 @@ sap.ui.define([
         onInit: async function () {
             const { body } = await models.read({ sService: "/chat", sPath: "/Conversation" });
             console.log(body)
-            let consersationSet = [];
-            const seenIds = new Set();
-            body.results.forEach(conversation => {
-                if (!seenIds.has(conversation.id)) {
-                    seenIds.add(conversation.id);
-                    consersationSet.push(conversation);
-                }
-            });
-            this.setModel({ oModel: consersationSet, sModelName: "conversation" })
+            this.setModel({ oModel: body.results, sModelName: "conversation" })
         },
 
-        onPressList: function (oEvent) {
+        onChatPress: function (oEvent) {
             const oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             const listItem = oEvent.getParameter("listItem");
             const oBindingContext = listItem.getBindingContext("conversation");
-            const conversationId = oBindingContext.getProperty("conversationId");
-            oRouter.navTo("ConversationMessages", { conversationId });
+            const conversationId = oBindingContext.getProperty("id");
+            oRouter.navTo("ChatMessageHistory", { conversationId });
         },
 
-        onCreateChat: function () {
+        onChatCreate: function () {
             this.getOwnerComponent().getRouter().navTo("Chat");
         },
 
-        onDeleteChat: function (oEvent) {
+        onChatDelete: function (oEvent) {
             const oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             const listItem = oEvent.getParameter("listItem");
-            const conversationId = listItem.getBindingContext("conversation").getProperty("conversationId");
+            const conversationId = listItem.getBindingContext("conversation").getProperty("id");
             const conversationTitle = listItem.getBindingContext("conversation").getProperty("title").toString();
             const curRouteHash = oRouter.getHashChanger().getHash();
             const curRouteName = oRouter.getRouteInfoByHash(curRouteHash);
@@ -54,28 +46,19 @@ sap.ui.define([
                     onClose: async sAction => {
                         if (sAction !== "Remove") return;
                         try {
-                            await this.requestConversationDelete(conversationId);
-                            MessageToast.show("Chat deleted successfully!");
+                            const { error } = await models.remove({ sService: "/chat", sPath: `/Conversation(${conversationId})` })
+                            error
+                                ? MessageBox.error("An unexpected error occurred!")
+                                : MessageToast.show("Chat deleted successfully!");
                             if (curRouteName.name !== "Chat") this.oRouter.navTo("Chat");
-                            else {
-                                this.getView().byId("leftScreenChatHistory").getBinding("items").refresh();
-                            }
+                            else { this.getView().byId("leftScreenChatHistory").getBinding("items").refresh(); }
                         } catch (error) {
-                            console.error(error);
+                            console.log(error);
+                            MessageBox.error("An unexpected error occurred!");
                         };
                     }
                 }
             )
         },
-
-        // requestConversationDelete: async function (conversationId) {
-        //     try {
-        //         const oBody = { conversationId: conversationId }
-        //         const response = await models.create({ sPath: "/delete", oBody })
-        //         return response
-        //     } catch (error) {
-        //         console.error(error);
-        //     }
-        // },
     });
 });
