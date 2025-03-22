@@ -1,0 +1,15 @@
+<mvc:View controllerName="com.lab2dev.uichatbotaigabrielmarangoni.controller.App"
+    displayBlock="true"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f"
+    xmlns:m="sap.m"
+    xmlns="sap.m" >
+    <App id="root">
+        <f:FlexibleColumnLayout 
+        layout="TwoColumnsMidExpanded" 
+        id="flexibleColumnLayout" 
+        backgroundDesign="Solid"
+        >
+        </f:FlexibleColumnLayout>
+    </App>
+</mvc:View>

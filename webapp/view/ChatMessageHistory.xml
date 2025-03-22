@@ -1,0 +1,61 @@
+<mvc:View
+    controllerName="com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatMessageHistory
+    "
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns="sap.f"
+>
+            <m:Page
+                id="ChatMessageHistory"
+                showFooter="true"
+                showHeader="false"
+                floatingFooter="true"
+                class="chatContainer"
+            >
+                <m:VBox id="officialRightScreenVBox2">
+                    <m:List
+                        id="officialRightScreenVBoxList"
+                        showNoData="false"
+                        showSeparators="Inner"
+                        updateFinished=".onListUpdateFinished"
+                        items="{
+                        path:'chatModel>/chatHistory',
+                        sorter:{
+                            path:'message_time',
+                            descending: false
+                        }
+                    }"
+                        busy="{chatModel>/isBusy}"
+                    >
+                    <m:FeedListItem 
+                        id="_IDGenFeedListItem1"
+                        class="feedListItem"
+                        convertLinksToAnchorTags="All"
+                        info="{chatModel>role}"
+                        text="{chatModel>content}"
+                        timestamp="{chatModel>creation_time}"
+                        icon="{chatModel>icon_path}"
+                        iconInitials="{chatModel>initials}"
+                        showIcon="true">
+                    </m:FeedListItem>
+                    </m:List>
+                </m:VBox>
+
+                <m:footer>
+                    <m:OverflowToolbar
+                        id="officialRightScreenOverflowToolbar2"
+                        width="100%"
+                        height="auto"
+                    >
+                        <m:FeedInput
+                            id="officialFeedInput2"
+                            showIcon="false"
+                            placeholder="Digite sua dúvida"
+                            growing="true"
+                            post=".onSendMessage"
+                            enabled="{chatModel>/enableTextArea}"
+                        />
+                    </m:OverflowToolbar>
+                </m:footer>
+            </m:Page>
+</mvc:View>

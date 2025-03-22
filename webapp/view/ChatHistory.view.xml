@@ -1,0 +1,61 @@
+<mvc:View
+    xmlns:tnt="sap.tnt"
+    controllerName="com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatHistory"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.f"
+    xmlns:m="sap.m"
+    height="100%"
+    displayBlock="true"
+>
+    <m:Page
+        id="leftScreenPage"
+        showHeader="false"
+        showFooter="true"
+    >
+        <m:OverflowToolbar
+            id="leftScreenOverflowToolBar"
+            height="3rem"
+        >
+            <m:Title
+                id="leftScreenToolBarTitle"
+                text="Conversas"
+            />
+            <m:ToolbarSpacer id="leftScreenToolBarSpacer" />
+            <m:Button
+                id="leftScreenToolBarButton"
+                icon="sap-icon://add"
+                text="Nova Conversa"
+                press=".onCreateNewChat"
+            />
+        </m:OverflowToolbar>
+        <m:ScrollContainer
+            vertical="true"
+            height="70%"
+            focusable="true"
+        >
+            <m:List
+                id="leftScreenChatHistory"
+                growing="true"
+                growingThreshold="15"
+                growingScrollToLoad="true"
+                showNoData="false"
+                enableBusyIndicator="true"
+                items="{
+                        path:'conversation>/oData/results',
+                        sorter:{path:'last_update_time', descending: true}
+                    }"
+                itemPress=".onPressList"
+                mode="Delete"
+                delete=".onHandleConversationDelete"
+            >
+                <m:StandardListItem
+                    type="Navigation"
+                    title="{= ${conversation>title} ? ${conversation>title} : 'Sem Título' }"
+                    description="{= ${conversation>userID} ? ${conversation>userID} : 'Sem Usuário' }"
+                />
+            </m:List>
+        </m:ScrollContainer>
+    </m:Page>
+</mvc:View>
+ 
+ 

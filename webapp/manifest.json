@@ -1,0 +1,148 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "com.lab2dev.uichatbotaigabrielmarangoni",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.16.5",
+      "toolsId": "b5b4eaf6-d934-440c-8c2b-92a22aac2d19"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/chat/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/mainService/metadata.xml",
+          "odataVersion": "4.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "UI_Chatbot_AI-display": {
+          "semanticObject": "UI_Chatbot_AI",
+          "action": "display",
+          "title": "{{UI_Chatbot_AI-display.flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.133.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "com.lab2dev.uichatbotaigabrielmarangoni.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "rootView": {
+      "viewName": "com.lab2dev.uichatbotaigabrielmarangoni.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "flexibleColumnLayout",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "com.lab2dev.uichatbotaigabrielmarangoni.view",
+        "async": true,
+        "viewPath": "com.lab2dev.uichatbotaigabrielmarangoni.view"
+      },
+      "routes": [
+        {
+          "name": "RouteChatHistory",
+          "pattern": ":?query:",
+          "target": [
+            "TargetChatHistory",
+            "TargetChat"
+          ],
+          "layout": "TwoColumnsMidExpanded"
+        }
+      ],
+      "targets": {
+        "TargetChatHistory": {
+          "id": "ChatHistory",
+          "name": "ChatHistory",
+          "controlAggregation": "beginColumnPages"
+        },
+        "TargetChat": {
+          "id": "Chat",
+          "name": "Chat",
+          "controlAggregation": "midColumnPages"
+        },
+        "TargetChatMessageHistory": {
+          "id": "ChatMessageHistory",
+          "name": "ChatMessageHistory",
+          "controlAggregation": "midColumnPages"
+        }
+      }
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "comlab2devuichatbotaigabrielmarangoni"
+  }
+}
