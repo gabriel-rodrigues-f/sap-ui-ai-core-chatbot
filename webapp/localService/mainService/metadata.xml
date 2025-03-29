@@ -66,8 +66,8 @@
                 <Property Name="conversationId" Type="Edm.String"/>
                 <Property Name="messageId" Type="Edm.String"/>
                 <Property Name="messageCreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="userId" Type="Edm.String"/>
-                <Property Name="prompt" Type="Edm.String"/>
+                <Property Name="user" Type="Edm.String"/>
+                <Property Name="content" Type="Edm.String"/>
             </ComplexType>
             <Action Name="generate" IsBound="false">
                 <Parameter Name="properties" Type="ChatService.ChatProperties"/>

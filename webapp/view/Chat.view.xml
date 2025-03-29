@@ -17,14 +17,14 @@
                         showSeparators="Inner"
                         noDataText="Como posso te ajudar?"
                         updateFinished=".onListUpdateFinished"
-                        items="{chatModel>/chatHistory/}"
+                        items="{chatModel>/messages/}"
                         busy="{chatModel>/isBusy}"
                     >
                         <m:FeedListItem
                             id="initialRightScreenListItem"
-                            info="{chatModel>user_role}"
+                            info="{chatModel>role}"
                             text="{chatModel>content}"
-                            timestamp="{chatModel>message_time}"
+                            timestamp="{chatModel>timestamp}"
                             icon="{chatModel>initials}"
                             showIcon="true"
                         />

@@ -25,7 +25,7 @@
                 id="leftScreenToolBarButton"
                 icon="sap-icon://add"
                 text="Nova Conversa"
-                press=".onChatPress"
+                press=".onChatCreate"
             />
         </m:OverflowToolbar>
         <m:ScrollContainer
@@ -44,7 +44,7 @@
                         path:'conversation>/',
                         sorter:{path:'modifiedAt', descending: true}
                     }"
-                itemPress=".onChatCreate"
+                itemPress=".onChatPress"
                 mode="Delete"
                 delete=".onChatDelete"
             >
