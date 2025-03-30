@@ -3,9 +3,10 @@ sap.ui.define(
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
+    "sap/ui/model/FilterOperator",
+    "sap/ui/core/UIComponent",
   ],
-  function (Controller, JSONModel, Filter, FilterOperator) {
+  function (Controller, JSONModel, Filter, FilterOperator, UIComponent) {
     "use strict"
 
     return Controller.extend(
@@ -30,6 +31,11 @@ sap.ui.define(
         resolveURI: function (sURI) {
           const oComponent = this.getOwnerComponent();
           return oComponent.getManifestObject().resolveUri(sURI);
+        },
+
+        navigateTo({ sViewName, sId }){
+          const oRouter = UIComponent.getRouterFor(this);
+          oRouter.navTo(sViewName, { id: sId });
         }
       }
     )

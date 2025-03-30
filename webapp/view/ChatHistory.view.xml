@@ -18,13 +18,13 @@
         >
             <m:Title
                 id="leftScreenToolBarTitle"
-                text="Conversas"
+                text="Chats"
             />
             <m:ToolbarSpacer id="leftScreenToolBarSpacer" />
             <m:Button
                 id="leftScreenToolBarButton"
                 icon="sap-icon://add"
-                text="Nova Conversa"
+                text="New Chat"
                 press=".onChatCreate"
             />
         </m:OverflowToolbar>

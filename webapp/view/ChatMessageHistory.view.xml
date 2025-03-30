@@ -49,7 +49,7 @@
                         <m:FeedInput
                             id="officialFeedInput2"
                             showIcon="false"
-                            placeholder="Digite sua dúvida"
+                            placeholder="Enter your question"
                             growing="true"
                             post=".onSendMessage"
                             enabled="{chatModel>/enableTextArea}"

@@ -113,7 +113,7 @@
       },
       "routes": [
         {
-          "name": "RouteChatHistory",
+          "name": "Chat",
           "pattern": ":?query:",
           "target": [
             "TargetChatHistory",

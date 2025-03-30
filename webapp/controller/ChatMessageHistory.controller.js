@@ -9,7 +9,7 @@ sap.ui.define([
 
     return BaseController.extend("com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatMessageHistory", {
 
-        _chat: {
+        _oChat: {
             id: "",
             messageId: "",
             timestamp: "",
@@ -21,90 +21,88 @@ sap.ui.define([
         },
 
         onInit: async function () {
-            this.setModel({ oModel: this._chat, sModelName: "chatModel" })
-            const user = await this._getCurrentUser();
-            this.setModel({ oModel: user, sModelName: "currentUserModel" });
+            this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
+            const oUser = await this._getCurrentUser();
+            this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
             oRouter.getRoute("ChatMessageHistory").attachPatternMatched(this._onRouteMatched, this);
         },
 
         onListUpdateFinished: function (oEvent) {
-            const items = oEvent.getSource().getItems();
-            if (items.length === 0) return;
-            items[items.length - 1].focus();
+            const aItems = oEvent.getSource().getItems();
+            if (aItems.length === 0) return;
+            aItems[aItems.length - 1].focus();
         },
 
         onSendMessage: async function (oEvent) {
             this._setBusy(true);
             this._setEnableTextArea(false);
-            const message = oEvent.getParameter("value");
-            const source = oEvent.getSource();
-            const oRouter = UIComponent.getRouterFor(this);
-            this._appendUserPrompt(message);
-            const chatModel = this.getModel("chatModel");
-            const id = chatModel.getProperty("/id");
+            const sMessage = oEvent.getParameter("value");
+            this._appendUserPrompt(sMessage);
+            const oChatModel = this.getModel("chatModel");
+            const sId = oChatModel.getProperty("/id");
             const { email } = await this._getCurrentUser();
-            const oBody = {
-                id,
-                messageId: chatModel.getProperty("/messageId"),
-                timestamp: chatModel.getProperty("/timestamp"),
+            const oUserPrompt = {
+                id: oChatModel.getProperty("/messageId"),
+                conversationId: sId,
+                timestamp: oChatModel.getProperty("/timestamp"),
                 user: email,
-                content: chatModel.getProperty("/content")
+                content: oChatModel.getProperty("/content")
             };
-            const { body, error } = await await models.create({ sService: "", sPath: "", oBody });
+            const { body, error } = await models.create({ sService: "/chat", sPath: "/generate", oUserPrompt });
             if (error) return MessageBox.error("Unexpected Error!");
             this._appendChatResponse(response.data.getChatRagResponse);
-            oRouter.navTo("ChatMessageHistory", { id });
+            this.navigateTo({ sViewName: "ChatMessageHistory", sId });
             this._setBusy(false);
             this._setEnableTextArea(true);
         },
 
-        _appendUserPrompt: function (oMessage) {
-            const chatModel = this.getModel('chatModel');
-            const messages = chatModel.getProperty("/messages");
-            const currentUserModel = this.getModel('currentUserModel');
-            if (messages) {
-                const id = messages[0].conversation_id;
-                chatModel.setProperty("/id", id);
-                chatModel.setProperty("/messageId", crypto.randomUUID());
-                chatModel.setProperty("/timestamp", new Date().toISOString());
-                chatModel.setProperty("/content", oMessage);
-                chatModel.setProperty("/user", currentUserModel.getProperty("/user"));
-                messages.push({
-                    id: chatModel.getProperty("/id"),
-                    messageId: chatModel.getProperty("/messageId"),
+        _appendUserPrompt: function (sMessage) {
+            const oChatModel = this.getModel('chatModel');
+            const aMessages = oChatModel.getProperty("/messages");
+            const oCurrentUserModel = this.getModel('currentUserModel');
+            if (aMessages) {
+                const sId = aMessages[0].conversation_id;
+                oChatModel.setProperty("/id", sId);
+                oChatModel.setProperty("/messageId", crypto.randomUUID());
+                oChatModel.setProperty("/timestamp", new Date().toISOString());
+                oChatModel.setProperty("/content", sMessage);
+                oChatModel.setProperty("/user", oCurrentUserModel.getProperty("/user"));
+                aMessages.push({
+                    id: oChatModel.getProperty("/messageId"),
+                    conversationId: oChatModel.getProperty("/id"),
                     role: "user",
-                    content: oMessage,
-                    createdAt: new Date(chatModel.getProperty("/timestamp"))
+                    content: sMessage,
+                    createdAt: new Date(oChatModel.getProperty("/timestamp"))
                 });
-                chatModel.setProperty("/messages", messages);
+                oChatModel.setProperty("/messages", aMessages);
             }
         },
 
         _appendChatResponse: function (oResponse) {
-            const chatModel = this.getModel("chatModel");
-            const messages = chatModel.getProperty("/messages");
-            messages.push({
-                conversationId: chatModel.getProperty("/id"),
-                messageId: crypto.randomUUID(),
+            const oChatModel = this.getModel("chatModel");
+            const aMessages = oChatModel.getProperty("/messages");
+            aMessages.push({
+                id: crypto.randomUUID(),
+                conversationId: oChatModel.getProperty("/id"),
                 role: oResponse.role,
                 content: oResponse.content,
                 iconPath: "sap-icon://da-2",
                 createdAt: new Date(oResponse.createdAt),
                 initials: ""
             });
-            chatModel.setProperty("/messages", messages);
+            oChatModel.setProperty("/messages", aMessages);
         },
 
         _getCurrentUser: async function () {
-            const URI = this.resolveURI("user-api/currentUser");
+            const sURI = this.resolveURI("user-api/currentUser");
             try {
                 return Promise.resolve({
                     firstname: "FirstName",
                     lastname: "LastName",
                     email: "mail@mail.com"
                 });
-                // const response = await fetch(URI, {
+                // const response = await fetch(sURI, {
                 //     method: "GET",
                 //     headers: { "content-type": "application/json" }
                 // });
@@ -115,51 +113,52 @@ sap.ui.define([
         },
 
         _onRouteMatched: async function (oEvent) {
-            const id = oEvent.getParameter("arguments").id;
-            const { body, error } = await models.read({
+            const sId = oEvent.getParameter("arguments").id;
+            const { body: oBody, error: oError } = await models.read({
                 sService: "/chat",
                 sPath: "/Conversation",
                 oOptions: {
-                    urlParameters: { "$expand": "messages", "$filter": `id eq ${id}` }
+                    urlParameters: { "$expand": "messages", "$filter": `id eq ${sId}` }
                 }
             });
-            const currentChat = body.results[0];
-            console.log(currentChat)
-            const chatModelData = {
-                ...currentChat,
-                messages: currentChat.messages.results
+            if (oError) return MessageBox.error("Unexpected Error!");
+            if(oBody.results.length){
+                const oCurrentChat = oBody.results[0];
+                const oChatModel = {
+                    ...oCurrentChat,
+                    messages: oCurrentChat.messages.results
+                }
+                this.setModel({ oModel: oChatModel, sModelName: "chatModel" });
+                this._setConversationHistory(oBody.results);
             };
-            this.setModel({ oModel: chatModelData, sModelName: "chatModel" });
-            this._setConversationHistory(body.results);
         },
 
-
-        _setConversationHistory: async function (aConversations) {
-            const currentUserModel = await this.getModel('currentUserModel');
-            const chatModel = this.getModel('chatModel');
-            const messages = chatModel.getProperty("/messages");
-            for (const message of aConversations) {
-                const messageModel = {
-                    messageId: message.id,
-                    conversationId: message.conversation_id,
-                    timestamp: new Date(message.createdAt),
-                    content: message.content,
+        _setConversationHistory: async function (aCurrentConversationMessages) {
+            const oCurrentUserModel = await this.getModel('currentUserModel');
+            const oChatModel = this.getModel('chatModel');
+            const aMessages = oChatModel.getProperty("/messages");
+            for (const oMessage of aCurrentConversationMessages) {
+                const oBody = {
+                    id: oMessage.id,
+                    conversationId: oMessage.conversation_id,
+                    timestamp: new Date(oMessage.createdAt),
+                    content: oMessage.content,
                     email: "",
-                    role: message.role === "assistant" ? "assistant " : "You",
-                    iconPath: message.role === "assistant" ? "sap-icon://da-2" : "",
-                    initials: message.role === "assistant" ? "" : currentUserModel.getProperty("/firstname").charAt(0) + currentUserModel.getProperty("/lastname").charAt(0),
+                    role: oMessage.role === "assistant" ? "assistant " : "You",
+                    iconPath: oMessage.role === "assistant" ? "sap-icon://da-2" : "",
+                    initials: oMessage.role === "assistant" ? "" : oCurrentUserModel.getProperty("/firstname").charAt(0) + oCurrentUserModel.getProperty("/lastname").charAt(0),
                 };
-                if (message.id) messages.push(messageModel);
-            }
-            chatModel.setProperty("/messages", messages);
+                if (oBody.id) aMessages.push(oBody);
+            };
+            oChatModel.setProperty("/messages", aMessages);
         },
 
-        _setBusy: function (isBusy) {
-            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: isBusy });
+        _setBusy: function (bIsBusy) {
+            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
         },
 
-        _setEnableTextArea: function (isEnable) {
-            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: isEnable });
+        _setEnableTextArea: function (bIsEnabled) {
+            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: bIsEnabled });
         },
     });
 });

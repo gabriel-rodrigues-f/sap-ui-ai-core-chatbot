@@ -11,14 +11,14 @@ sap.ui.define([
 
         /* 
             chatModel: {
-            id: UUID,
-            messageId: UUID,
-            timestamp: Date,
-            user: string,
-            content: string,
-            messages [],
-            isBusy: boolean
-            enableTextArea: boolean
+                id: UUID,
+                messageId: UUID,
+                timestamp: Date,
+                user: string,
+                content: string,
+                messages [],
+                isBusy: boolean
+                enableTextArea: boolean
             }
 
             messages : {
@@ -30,7 +30,7 @@ sap.ui.define([
             }
         */
 
-        _chat: {
+        _oChat: {
             id: "",
             messageId: "",
             timestamp: "",
@@ -42,88 +42,85 @@ sap.ui.define([
         },
 
         onInit: async function () {
-            this.setModel({ oModel: this._chat, sModelName: "chatModel" })
-            const user = await this._getCurrentUser();
-            this.setModel({ oModel: user, sModelName: "currentUserModel" })
+            this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
+            const oUser = await this._getCurrentUser();
+            this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
-            oRouter.getRoute("Chat").attachPatternMatched(this._clearMessages(), this);
+            oRouter.getRoute("Chat").attachPatternMatched(this._clearMessages, this);
         },
 
         onListUpdateFinished: function (oEvent) {
-            const items = oEvent.getSource().getItems();
-            if (items.length === 0) return;
-            items[items.length - 1].focus();
+            const aItems = oEvent.getSource().getItems();
+            if (aItems.length === 0) return;
+            aItems[aItems.length - 1].focus();
         },
 
         onSendMessage: async function (oEvent) {
             this._setBusy(true);
             this._setEnableTextArea(false);
-            const chatModel = this.getModel('chatModel');
-            const id = chatModel.getProperty("/id");
-            const message = oEvent.getParameter("value");
-            const source = oEvent.getSource();
-            const oRouter = UIComponent.getRouterFor(this);
-            this._appendUserPrompt(message);
-            const { email } = await this._getCurrentUser();
-            const oBody = {
-                id,
-                messageId: chatModel.getProperty("/messageId"),
-                timestamp: chatModel.getProperty("/timestamp"),
-                user: email,
-                content: chatModel.getProperty("/content")
+            const oChatModel = this.getModel('chatModel');
+            const sConversationId = oChatModel.getProperty("/id");
+            const sMessage = oEvent.getParameter("value");
+            this._appendUserPrompt(sMessage);
+            const { email: sEmail } = await this._getCurrentUser();
+            const oUserPrompt = {
+                id: oChatModel.getProperty("/messageId"),
+                conversationId: sConversationId,
+                timestamp: oChatModel.getProperty("/timestamp"),
+                user: sEmail,
+                content: oChatModel.getProperty("/content")
             };
-            const { body, error } = await await models.create({ sService: "", sPath: "", oBody });
-            if (error) return MessageBox.error("Unexpected Error!");
+            const { body: oBody, error: oError } = await models.create({ sService: "/chat", sPath: "/generate", oBody: oUserPrompt });
+            if (oError) return MessageBox.error("Unexpected Error!");
             this._appendChatResponse(response.data.getChatRagResponse);
-            oRouter.navTo("ChatMessageHistory", { id });
+            this.navigateTo({ sViewName: "ChatMessageHistory", sId: sConversationId });
             this._setBusy(false);
             this._setEnableTextArea(true);
         },
 
-        _setBusy: function (isBusy) {
-            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: isBusy });
+        _setBusy: function (bIsBusy) {
+            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
         },
 
-        _setEnableTextArea: function (isEnable) {
-            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: isEnable });
+        _setEnableTextArea: function (sIsEnabled) {
+            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: sIsEnabled });
         },
 
-        _appendUserPrompt: function (oMessage) {
-            const chatModel = this.getModel('chatModel');
-            const messages = chatModel.getProperty("/messages");
-            const currentUserModel = this.getModel('currentUserModel');
-            if(messages){
-                const id = messages[0].conversation_id;
-                console.log("appendUserPrompt" + id)
-                chatModel.setProperty("/id", id);
-                chatModel.setProperty("/messageId", crypto.randomUUID());
-                chatModel.setProperty("/timestamp", new Date().toISOString());
-                chatModel.setProperty("/content", oMessage);
-                chatModel.setProperty("/user", currentUserModel.getProperty("/user"));
-                messages.push({
-                    id: chatModel.getProperty("/id"),
-                    messageId: chatModel.getProperty("/messageId"),
+        _appendUserPrompt: function (sMessage) {
+            const oChatModel = this.getModel('chatModel');
+            const aMessages = oChatModel.getProperty("/messages");
+            const oCurrentUserModel = this.getModel('currentUserModel');
+            if (aMessages) {
+                const sConversationId = aMessages[0].conversation_id;
+                oChatModel.setProperty("/id", sConversationId);
+                oChatModel.setProperty("/messageId", crypto.randomUUID());
+                oChatModel.setProperty("/timestamp", new Date().toISOString());
+                oChatModel.setProperty("/content", sMessage);
+                oChatModel.setProperty("/user", oCurrentUserModel.getProperty("/user"));
+                aMessages.push({
+                    id: oChatModel.getProperty("/messageId"),
+                    conversationId: oChatModel.getProperty("/id"),
                     role: "user",
-                    content: oMessage,
-                    createdAt: new Date(chatModel.getProperty("/timestamp"))
+                    content: sMessage,
+                    createdAt: new Date(oChatModel.getProperty("/timestamp"))
                 });
-                chatModel.setProperty("/messages", messages);
-            }
+                oChatModel.setProperty("/messages", aMessages);
+            };
         },
 
         _appendChatResponse: function (oResponse) {
-            const chatModel = this.getModel("chatModel");
-            const messages = chatModel.getProperty("/messages");
-            messages.push({
-                conversationId: chatModel.getProperty("/id"),
-                messageId: crypto.randomUUID(),
+            const oChatModel = this.getModel("chatModel");
+            const aMessages = chatModel.getProperty("/messages");
+            aMessages.push({
+                conversationId: oChatModel.getProperty("/id"),
+                id: crypto.randomUUID(),
                 role: oResponse.role,
                 content: oResponse.content,
                 iconPath: "sap-icon://da-2",
                 createdAt: new Date(oResponse.createdAt),
                 initials: ""
             });
-            chatModel.setProperty("/messages", messages);
+            oChatModel.setProperty("/messages", aMessages);
         },
 
         _clearMessages: function () {
@@ -131,19 +128,20 @@ sap.ui.define([
         },
 
         _getCurrentUser: async function () {
-            const URI = this.resolveURI("user-api/currentUser");
+            const sURI = this.resolveURI("user-api/currentUser");
             try {
                 return Promise.resolve({
                     firstname: "FirstName",
                     lastname: "LastName",
                     email: "mail@mail.com"
                 });
-                // const response = await fetch(URI, {
+                // const response = await fetch(sURI, {
                 //     method: "GET",
                 //     headers: { "content-type": "application/json" }
                 // });
                 // return await response.json();
-            } catch (error) {
+            } catch (oError) {
+                console.error(oError);
                 MessageBox.error("Unable to get current user!");
             };
         },
