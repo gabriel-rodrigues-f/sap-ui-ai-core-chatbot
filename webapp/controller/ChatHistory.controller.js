@@ -11,16 +11,15 @@ sap.ui.define([
 
         onInit: async function () {
             const { body: oBody, error: oError } = await models.read({ sService: "/chat", sPath: "/Conversation" });
-            if (oError) return MessageBox.error("An unexpected error occurred!");
+            if (oError) return MessageBox.error("Error fetching chats!");
             this.setModel({ oModel: oBody.results, sModelName: "conversation" });
         },
 
         onChatPress: function (oEvent) {
             const oRouter = UIComponent.getRouterFor(this);
-            const aListItems = oEvent.getParameter("listItem");
-            const oBindingContext = aListItems.getBindingContext("conversation");
+            const oListItem = oEvent.getParameter("listItem");
+            const oBindingContext = oListItem.getBindingContext("conversation");
             const sId = oBindingContext.getProperty("id");
-
             this.navigateTo({ sViewName: "ChatMessageHistory", sId });
         },
 
@@ -29,35 +28,29 @@ sap.ui.define([
         },
 
         onChatDelete: function (oEvent) {
-            const oRouter = UIComponent.getRouterFor(this);
             const oListItem = oEvent.getParameter("listItem");
             const sId = oListItem.getBindingContext("conversation").getProperty("id");
-            const sTitle = oListItem.getBindingContext("conversation").getProperty("title");
             MessageBox.warning(
-                "Are you sure you want to delete this conversation?",
-                {
-                    icon: MessageBox.Icon.WARNING,
-                    title: "Do you want to delete chat?",
-                    actions: ["teste", MessageBox.Action.CANCEL],
-                    emphasizedAction: "Remove",
-                    styleClass: "sapMUSTRemovePopoverContainer",
-                    initialFocus: MessageBox.Action.CANCEL,
-                    onClose: async sAction => {
-                        if (sAction !== "Remove") return;
-                        try {
-                            const { error: oRemoveError } = await models.remove({ sService: "/chat", sPath: `/Conversation(${sId})` })
-                            if (oRemoveError) return MessageBox.error("An unexpected error occurred!");
-                            MessageToast.show("Chat deleted successfully!");
-                            const { body: oBody, error: oReadError } = await models.read({ sService: "/chat", sPath: "/Conversation" });
-                            if (oReadError) return MessageBox.error("An unexpected error occurred!");
-                            this.setModel({ oModel: oBody.results, sModelName: "conversation" });
-                        } catch (oError) {
-                            console.error(oError);
-                            MessageBox.error("An unexpected error occurred!");
-                        };
+                "Are you sure you want to delete this conversation?", {
+                icon: MessageBox.Icon.WARNING,
+                title: "Delete Chat?",
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.OK,
+                initialFocus: MessageBox.Action.CANCEL,
+                onClose: async sAction => {
+                    if (sAction !== MessageBox.Action.OK) return;
+                    const { error: oRemoveError } = await models.remove({ sService: "/chat", sPath: `/Conversation/${sId}` });
+                    oRemoveError
+                        ? MessageBox.error("Error fetching chats!")
+                        : MessageToast.show("Chat deleted successfully!");
+                    const { body: oBody, error: oReadError } = await models.read({ sService: "/chat", sPath: "/Conversation" });
+                    if (oReadError) {
+                        this.setModel({ oModel: [], sModelName: "conversation" });
+                        return MessageBox.error("Error fetching chats!");
                     }
+                    this.setModel({ oModel: oBody.results, sModelName: "conversation" });
                 }
-            );
+            });
         }
     });
 });

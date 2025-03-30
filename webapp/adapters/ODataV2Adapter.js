@@ -3,8 +3,7 @@ sap.ui.define(["sap/ui/model/odata/v2/ODataModel"], function (ODataModel) {
 
     return {
         _getODataModel: async sService => {
-            const oDataModel = new ODataModel(`/odata/v2${sService}`)
-            oDataModel.refreshMetadata();
+            const oDataModel = new ODataModel(`/odata/v2${sService}`, { defaultUpdateMethod: "PUT", useBatch: false })
             return new Promise(function (resolve, reject) {
                 oDataModel.attachMetadataLoaded(_ => resolve(oDataModel))
                 oDataModel.attachMetadataFailed(_ => reject(new Error("It was not possible to read the metadata")));
@@ -27,8 +26,10 @@ sap.ui.define(["sap/ui/model/odata/v2/ODataModel"], function (ODataModel) {
                 return await new Promise((resolve, reject) => {
                     oConnection[sMethod](...oParams, {
                         ...oOptions,
-                        success: (oData, oResponse) =>
-                            resolve(this._makeSuccessResponse(oData, oResponse)),
+                        success: (oData, oResponse) => {
+                            console.log(oResponse);
+                            resolve(this._makeSuccessResponse(oData, oResponse))
+                        },
                         error: oError => reject(this._makeErrorResponse(oError)),
                     })
                 })
