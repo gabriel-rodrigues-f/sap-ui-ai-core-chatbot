@@ -3,14 +3,23 @@ sap.ui.define([
     "com/lab2dev/uichatbotaigabrielmarangoni/model/models",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "sap/ui/core/UIComponent"
-], function (BaseController, models, MessageToast, MessageBox, UIComponent) {
+], function (BaseController, models, MessageToast, MessageBox) {
     'use strict';
 
     return BaseController.extend("com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatHistory", {
 
         onInit: async function () {
-            const { body: oBody, error: oError } = await models.read({ sService: "/chat", sPath: "/Conversation" });
+            const oComponent = this.getOwnerComponent();
+            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
+            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
+            const { body: oBody, error: oError } = await models.read({
+                sService: "/chat",
+                sPath: "/Conversation",
+                oOptions: {
+                    urlParameters: { "$filter": `user eq '${oUser.email}'` }
+                }
+
+            });
             if (oError) return MessageBox.error("Error fetching chats!");
             this.setModel({ oModel: oBody.results, sModelName: "conversation" });
         },

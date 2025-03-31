@@ -1,10 +1,9 @@
 sap.ui.define([
     "com/lab2dev/uichatbotaigabrielmarangoni/controller/BaseController",
     "com/lab2dev/uichatbotaigabrielmarangoni/model/models",
-    "sap/m/MessageToast",
     "sap/m/MessageBox",
     "sap/ui/core/UIComponent",
-], function (BaseController, models, MessageToast, MessageBox, UIComponent) {
+], function (BaseController, models, MessageBox, UIComponent) {
     'use strict';
 
     return BaseController.extend("com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatMessageHistory", {
@@ -16,7 +15,9 @@ sap.ui.define([
         },
 
         onInit: async function () {
-            const oUser = await this._getCurrentUser();
+            const oComponent = this.getOwnerComponent();
+            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
+            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
             this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
             oRouter.getRoute("ChatMessageHistory").attachPatternMatched(this._onRouteMatched, this);
@@ -34,11 +35,11 @@ sap.ui.define([
             const sMessage = oEvent.getParameter("value");
             const chatModel = this.getView().getModel('chatModel');
             const conversationId = chatModel.getProperty("/conversationId");
-            this._appendMessage({ 
-                role: "user", 
-                content: sMessage, 
+            this._appendMessage({
+                role: "user",
+                content: sMessage,
                 createdAt: new Date().toISOString()
-             })
+            })
             const { body: oBody, error: oError } = await models.create({
                 sService: "/chat",
                 sPath: "/sendMessage",
@@ -93,25 +94,6 @@ sap.ui.define([
 
         _setEnableTextArea: function (bIsEnabled) {
             this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: bIsEnabled });
-        },
-
-        _getCurrentUser: async function () {
-            const sURI = this.resolveURI("user-api/currentUser");
-            try {
-                return Promise.resolve({
-                    firstname: "FirstName",
-                    lastname: "LastName",
-                    email: "mail@mail.com"
-                });
-                // const response = await fetch(sURI, {
-                //     method: "GET",
-                //     headers: { "content-type": "application/json" }
-                // });
-                // return await response.json();
-            } catch (oError) {
-                console.error(oError);
-                MessageBox.error("Unable to get current user!");
-            };
-        },
+        }
     });
 });

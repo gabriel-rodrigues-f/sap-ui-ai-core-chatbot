@@ -2,11 +2,9 @@ sap.ui.define(
   [
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
-    "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator",
     "sap/ui/core/UIComponent",
   ],
-  function (Controller, JSONModel, Filter, FilterOperator, UIComponent) {
+  function (Controller, JSONModel, UIComponent) {
     "use strict"
 
     return Controller.extend(

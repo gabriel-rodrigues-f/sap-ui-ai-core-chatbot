@@ -1,10 +1,9 @@
 sap.ui.define([
     "com/lab2dev/uichatbotaigabrielmarangoni/controller/BaseController",
     "com/lab2dev/uichatbotaigabrielmarangoni/model/models",
-    "sap/m/MessageToast",
     "sap/m/MessageBox",
     "sap/ui/core/UIComponent",
-], function (BaseController, models, MessageToast, MessageBox, UIComponent) {
+], function (BaseController, models, MessageBox, UIComponent) {
     'use strict';
 
     return BaseController.extend("com.lab2dev.uichatbotaigabrielmarangoni.controller.Chat", {
@@ -17,7 +16,9 @@ sap.ui.define([
 
         onInit: async function () {
             this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
-            const oUser = await this._getCurrentUser();
+            const oComponent = this.getOwnerComponent();
+            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
+            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
             this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
             oRouter.getRoute("Chat").attachPatternMatched(this._clearMessages, this);
@@ -53,60 +54,27 @@ sap.ui.define([
             })
             this._setBusy(false);
             this._setEnableTextArea(true);
-
-            this.navigateTo({ sViewName: "ChatHistory", sId: oBody.startConversation
-                .conversationId });
-
-            this.navigateTo({ sViewName: "ChatMessageHistory", sId: oBody.startConversation
-                .conversationId });
+            this.navigateTo({ sViewName: "ChatHistory", sId: oBody.startConversation.conversationId });
+            this.navigateTo({ sViewName: "ChatMessageHistory", sId: oBody.startConversation.conversationId });
         },
+ 
         _clearMessages: function () {
-            this.getView().getModel("chatModel").setProperty("/messages", []);
+            this.setProperty({ sModel: "chatModel", sPath: "/messages", oProperty: [] });
         },
 
         _setBusy: function (bIsBusy) {
-            this.getView().getModel("chatModel").setProperty("/isBusy", bIsBusy);
+            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
         },
 
         _setEnableTextArea: function (sIsEnabled) {
-            this.getView().getModel("chatModel").setProperty("/isEnabled", sIsEnabled)
+            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: sIsEnabled });
         },
-
-        // _clearMessages: function () {
-        //     this.setProperty({ sModel: "chatModel", sPath: "/messages", oProperty: [] });
-        // },
-
-        // _setBusy: function (bIsBusy) {
-        //     this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
-        // },
-
-        // _setEnableTextArea: function (sIsEnabled) {
-        //     this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: sIsEnabled });
-        // },
 
         _appendMessage: function (oMessage) {
             const oChatModel = this.getModel('chatModel');
             const aMessages = oChatModel.getProperty("/messages");
             aMessages.push({ ...oMessage });
             oChatModel.setProperty("/messages", aMessages);
-        },
-
-        _getCurrentUser: async function () {
-            try {
-                return Promise.resolve({
-                    firstname: "FirstName",
-                    lastname: "LastName",
-                    email: "mail@mail.com"
-                });
-                // const response = await fetch(sURI, {
-                //     method: "GET",
-                //     headers: { "content-type": "application/json" }
-                // });
-                // return await response.json();
-            } catch (oError) {
-                console.error(oError);
-                MessageBox.error("Unable to get current user!");
-            }
-        },
+        }
     });
 });
