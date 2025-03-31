@@ -71,7 +71,6 @@ sap.ui.define([
                 this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
                 return MessageBox.error("Unexpected Error!");
             };
-
             const aMessages = oBody.messages.results.map(oMessage => ({
                 ...oMessage,
                 icon: oMessage.role === "assistant" ? "sap-icon://da-2" : undefined
