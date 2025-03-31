@@ -22,7 +22,7 @@
         "settings": {
           "annotations": [],
           "localUri": "localService/mainService/metadata.xml",
-          "odataVersion": "4.0"
+          "odataVersion": "2.0"
         }
       }
     },
@@ -113,29 +113,41 @@
       },
       "routes": [
         {
-          "name": "RouteChatHistory",
+          "name": "Chat",
           "pattern": ":?query:",
           "target": [
             "TargetChatHistory",
             "TargetChat"
           ],
           "layout": "TwoColumnsMidExpanded"
+        },
+        {
+          "name": "ChatMessageHistory",
+          "pattern": "ChatMessageHistory/{id}",
+          "target": [
+            "TargetChatHistory",
+            "TargetChatMessageHistory"
+          ],
+          "layout": "TwoColumnsMidExpanded"
         }
       ],
       "targets": {
-        "TargetChatHistory": {
-          "id": "ChatHistory",
-          "name": "ChatHistory",
-          "controlAggregation": "beginColumnPages"
-        },
         "TargetChat": {
           "id": "Chat",
-          "name": "Chat",
+          "viewName": "Chat",
+          "clearControlAggregation": true,
           "controlAggregation": "midColumnPages"
+        },
+        "TargetChatHistory": {
+          "id": "ChatHistory",
+          "viewName": "ChatHistory",
+          "clearControlAggregation": true,
+          "controlAggregation": "beginColumnPages"
         },
         "TargetChatMessageHistory": {
           "id": "ChatMessageHistory",
-          "name": "ChatMessageHistory",
+          "viewName": "ChatMessageHistory",
+          "clearControlAggregation": true,
           "controlAggregation": "midColumnPages"
         }
       }

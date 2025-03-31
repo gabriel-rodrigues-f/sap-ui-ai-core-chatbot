@@ -1,6 +1,5 @@
 <mvc:View
-    controllerName="com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatMessageHistory
-    "
+    controllerName="com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatMessageHistory"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:m="sap.m"
     xmlns="sap.f"
@@ -12,16 +11,16 @@
                 floatingFooter="true"
                 class="chatContainer"
             >
-                <m:VBox id="officialRightScreenVBox2">
+                <m:VBox id="chatMessageHistoryScreenVBox2">
                     <m:List
-                        id="officialRightScreenVBoxList"
-                        showNoData="false"
+                        id="chatMessageHistoryScreenVBoxList"
+                        noDataText="How can I help you?"
                         showSeparators="Inner"
                         updateFinished=".onListUpdateFinished"
                         items="{
-                        path:'chatModel>/chatHistory',
+                        path:'chatModel>/messages',
                         sorter:{
-                            path:'message_time',
+                            path:'timestamp',
                             descending: false
                         }
                     }"
@@ -33,8 +32,8 @@
                         convertLinksToAnchorTags="All"
                         info="{chatModel>role}"
                         text="{chatModel>content}"
-                        timestamp="{chatModel>creation_time}"
-                        icon="{chatModel>icon_path}"
+                        timestamp="{chatModel>createdAt}"
+                        icon="{chatModel>icon}"
                         iconInitials="{chatModel>initials}"
                         showIcon="true">
                     </m:FeedListItem>
@@ -43,14 +42,14 @@
 
                 <m:footer>
                     <m:OverflowToolbar
-                        id="officialRightScreenOverflowToolbar2"
+                        id="chatMessageHistoryScreenOverflowToolbar2"
                         width="100%"
                         height="auto"
                     >
                         <m:FeedInput
                             id="officialFeedInput2"
                             showIcon="false"
-                            placeholder="Digite sua dúvida"
+                            placeholder="Enter your question"
                             growing="true"
                             post=".onSendMessage"
                             enabled="{chatModel>/enableTextArea}"

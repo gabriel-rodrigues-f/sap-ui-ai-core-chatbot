@@ -18,14 +18,14 @@
         >
             <m:Title
                 id="leftScreenToolBarTitle"
-                text="Conversas"
+                text="Chats"
             />
             <m:ToolbarSpacer id="leftScreenToolBarSpacer" />
             <m:Button
                 id="leftScreenToolBarButton"
                 icon="sap-icon://add"
-                text="Nova Conversa"
-                press=".onCreateNewChat"
+                text="New Chat"
+                press=".onChatCreate"
             />
         </m:OverflowToolbar>
         <m:ScrollContainer
@@ -41,17 +41,17 @@
                 showNoData="false"
                 enableBusyIndicator="true"
                 items="{
-                        path:'conversation>/oData/results',
-                        sorter:{path:'last_update_time', descending: true}
+                        path:'conversation>/',
+                        sorter:{path:'modifiedAt', descending: true}
                     }"
-                itemPress=".onPressList"
+                itemPress=".onChatPress"
                 mode="Delete"
-                delete=".onHandleConversationDelete"
+                delete=".onChatDelete"
             >
                 <m:StandardListItem
                     type="Navigation"
                     title="{= ${conversation>title} ? ${conversation>title} : 'Sem Título' }"
-                    description="{= ${conversation>userID} ? ${conversation>userID} : 'Sem Usuário' }"
+                    description="{= ${conversation>user} ? ${conversation>user} : 'Sem Usuário' }"
                 />
             </m:List>
         </m:ScrollContainer>

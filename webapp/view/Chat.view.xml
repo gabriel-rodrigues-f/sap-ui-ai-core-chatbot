@@ -15,16 +15,16 @@
                     <m:List
                         id="initialRightScreenVBoxList"
                         showSeparators="Inner"
-                        noDataText="Como posso te ajudar?"
+                        noDataText="How can I help you?"
                         updateFinished=".onListUpdateFinished"
-                        items="{chatModel>/chatHistory/}"
+                        items="{chatModel>/messages/}"
                         busy="{chatModel>/isBusy}"
                     >
                         <m:FeedListItem
                             id="initialRightScreenListItem"
-                            info="{chatModel>user_role}"
+                            info="{chatModel>role}"
                             text="{chatModel>content}"
-                            timestamp="{chatModel>message_time}"
+                            timestamp="{chatModel>createdAt}"
                             icon="{chatModel>initials}"
                             showIcon="true"
                         />
@@ -40,7 +40,7 @@
                         <m:FeedInput
                             id="officialFeedInput"
                             showIcon="false"
-                            placeholder="Digite sua dúvida"
+                            placeholder="Enter your question"
                             growing="true"
                             post=".onSendMessage"
                             enabled="{chatModel>/enableTextArea}"
