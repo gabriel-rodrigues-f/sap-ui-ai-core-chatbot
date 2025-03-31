@@ -26,10 +26,7 @@ sap.ui.define(["sap/ui/model/odata/v2/ODataModel"], function (ODataModel) {
                 return await new Promise((resolve, reject) => {
                     oConnection[sMethod](...oParams, {
                         ...oOptions,
-                        success: (oData, oResponse) => {
-                            console.log(oResponse);
-                            resolve(this._makeSuccessResponse(oData, oResponse))
-                        },
+                        success: (oData, oResponse) => resolve(this._makeSuccessResponse(oData, oResponse)),
                         error: oError => reject(this._makeErrorResponse(oError)),
                     })
                 })

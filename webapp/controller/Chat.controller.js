@@ -32,60 +32,63 @@ sap.ui.define([
         onSendMessage: async function (oEvent) {
             this._setBusy(true);
             this._setEnableTextArea(false);
-            const oChatModel = this.getModel('chatModel');
             const sMessage = oEvent.getParameter("value");
-            this._appendUserPrompt(sMessage);
+            this._appendMessage({ role: "user", content: sMessage, createdAt: new Date().toISOString() })
             const { email: sEmail } = await this._getCurrentUser();
-            const oUserPrompt = {
-                user: sEmail,
-                content: sMessage
-            };
-            const { body: oBody, error: oError } = await models.create({ sService: "/chat", sPath: "/generate", oBody: oUserPrompt });
+            const { body: oBody, error: oError } = await models.create({
+                sService: "/chat",
+                sPath: "/startConversation",
+                oBody: { user: sEmail, content: sMessage }
+            });
             if (oError) {
                 this._setBusy(false);
                 this._setEnableTextArea(true);
                 return MessageBox.error("Unexpected Error!");
             }
-            this._appendChatResponse(oBody.getChatRagResponse);
+            this._appendMessage({
+                role: "assistant",
+                content: oBody.startConversation.content,
+                createdAt: new Date().toISOString(),
+                icon: oBody.startConversation.icon
+            })
             this._setBusy(false);
             this._setEnableTextArea(true);
+
+            this.navigateTo({ sViewName: "ChatHistory", sId: oBody.startConversation
+                .conversationId });
+
+            this.navigateTo({ sViewName: "ChatMessageHistory", sId: oBody.startConversation
+                .conversationId });
+        },
+        _clearMessages: function () {
+            this.getView().getModel("chatModel").setProperty("/messages", []);
         },
 
         _setBusy: function (bIsBusy) {
-            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
+            this.getView().getModel("chatModel").setProperty("/isBusy", bIsBusy);
         },
 
         _setEnableTextArea: function (sIsEnabled) {
-            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: sIsEnabled });
+            this.getView().getModel("chatModel").setProperty("/isEnabled", sIsEnabled)
         },
 
-        _appendUserPrompt: function (sMessage) {
+        // _clearMessages: function () {
+        //     this.setProperty({ sModel: "chatModel", sPath: "/messages", oProperty: [] });
+        // },
+
+        // _setBusy: function (bIsBusy) {
+        //     this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
+        // },
+
+        // _setEnableTextArea: function (sIsEnabled) {
+        //     this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: sIsEnabled });
+        // },
+
+        _appendMessage: function (oMessage) {
             const oChatModel = this.getModel('chatModel');
             const aMessages = oChatModel.getProperty("/messages");
-            if (aMessages) {
-                aMessages.push({
-                    role: "user",
-                    content: sMessage,
-                    createdAt: new Date()
-                });
-                oChatModel.setProperty("/messages", aMessages);
-            };
-        },
-
-        _appendChatResponse: function (oResponse) {
-            const oChatModel = this.getModel("chatModel");
-            const aMessages = oChatModel.getProperty("/messages");
-            aMessages.push({
-                role: oResponse.role,
-                content: oResponse.content,
-                iconPath: "sap-icon://da-2",
-                createdAt: new Date(oResponse.createdAt)
-            });
+            aMessages.push({ ...oMessage });
             oChatModel.setProperty("/messages", aMessages);
-        },
-
-        _clearMessages: function () {
-            this.setProperty({ sModel: "chatModel", sPath: "/messages", oProperty: [] });
         },
 
         _getCurrentUser: async function () {

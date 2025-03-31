@@ -10,14 +10,12 @@ sap.ui.define([
     return BaseController.extend("com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatMessageHistory", {
 
         _oChat: {
-            conversationId: "",
             messages: [],
             isBusy: false,
             enableTextArea: true,
         },
 
         onInit: async function () {
-            this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
             const oUser = await this._getCurrentUser();
             this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
@@ -34,38 +32,31 @@ sap.ui.define([
             this._setBusy(true);
             this._setEnableTextArea(false);
             const sMessage = oEvent.getParameter("value");
-            this._appendUserPrompt(sMessage);
-            const oChatModel = this.getModel("chatModel");
-            const conversationId = oChatModel.getProperty("/conversationId");
-            const { email: sEmail } = await this._getCurrentUser();
+            const chatModel = this.getView().getModel('chatModel');
+            const conversationId = chatModel.getProperty("/conversationId");
+            this._appendMessage({ 
+                role: "user", 
+                content: sMessage, 
+                createdAt: new Date().toISOString()
+             })
             const { body: oBody, error: oError } = await models.create({
                 sService: "/chat",
-                sPath: "/generate",
-                oUserPrompt: { content: sMessage, user: sEmail }
+                sPath: "/sendMessage",
+                oBody: { content: sMessage, conversationId }
             });
             if (oError) {
                 this._setBusy(false);
                 this._setEnableTextArea(true);
                 return MessageBox.error("Unexpected Error!");
             }
-            this._appendChatResponse(oBody);
+            this._appendMessage({
+                role: "assistant",
+                content: oBody.sendMessage.content,
+                createdAt: new Date().toISOString(),
+                icon: "sap-icon://da-2",
+            })
             this._setBusy(false);
             this._setEnableTextArea(true);
-        },
-
-        _appendUserPrompt: function (sMessage) {
-            const oChatModel = this.getModel("chatModel");
-            const aMessages = oChatModel.getProperty("/messages") || [];
-            aMessages.push({ role: "user", content: sMessage, timestamp: new Date().toISOString() });
-            oChatModel.setProperty("/messages", aMessages);
-        },
-
-        _appendChatResponse: function (oResponse) {
-            const oChatModel = this.getModel("chatModel");
-            const aMessages = oChatModel.getProperty("/messages") || [];
-            aMessages.push({ role: "assistant", content: oResponse.content, timestamp: oResponse.timestamp });
-            oChatModel.setProperty("/messages", aMessages);
-            oChatModel.setProperty("/conversationId", oResponse.conversationId);
         },
 
         _onRouteMatched: async function (oEvent) {
@@ -79,8 +70,21 @@ sap.ui.define([
                 this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
                 return MessageBox.error("Unexpected Error!");
             };
-            const oChatModel = { conversationId: oBody.id, messages: oBody.messages.results };
+
+            const aMessages = oBody.messages.results.map(oMessage => ({
+                ...oMessage,
+                icon: oMessage.role === "assistant" ? "sap-icon://da-2" : undefined
+            }));
+
+            const oChatModel = { conversationId, messages: aMessages };
             this.setModel({ oModel: oChatModel, sModelName: "chatModel" });
+        },
+
+        _appendMessage: function (oMessage) {
+            const oChatModel = this.getModel('chatModel');
+            const aMessages = oChatModel.getProperty("/messages") || [];
+            aMessages.push({ ...oMessage });
+            oChatModel.setProperty("/messages", aMessages);
         },
 
         _setBusy: function (bIsBusy) {

@@ -14,7 +14,7 @@
                 <m:VBox id="chatMessageHistoryScreenVBox2">
                     <m:List
                         id="chatMessageHistoryScreenVBoxList"
-                        showNoData="false"
+                        noDataText="How can I help you?"
                         showSeparators="Inner"
                         updateFinished=".onListUpdateFinished"
                         items="{
@@ -33,7 +33,7 @@
                         info="{chatModel>role}"
                         text="{chatModel>content}"
                         timestamp="{chatModel>createdAt}"
-                        icon="{chatModel>iconPath}"
+                        icon="{chatModel>icon}"
                         iconInitials="{chatModel>initials}"
                         showIcon="true">
                     </m:FeedListItem>

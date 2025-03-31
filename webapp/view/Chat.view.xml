@@ -24,7 +24,7 @@
                             id="initialRightScreenListItem"
                             info="{chatModel>role}"
                             text="{chatModel>content}"
-                            timestamp="{chatModel>timestamp}"
+                            timestamp="{chatModel>createdAt}"
                             icon="{chatModel>initials}"
                             showIcon="true"
                         />

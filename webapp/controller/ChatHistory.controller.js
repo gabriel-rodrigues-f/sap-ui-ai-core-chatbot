@@ -16,22 +16,25 @@ sap.ui.define([
         },
 
         onChatPress: function (oEvent) {
-            const oRouter = UIComponent.getRouterFor(this);
             const oListItem = oEvent.getParameter("listItem");
             const oBindingContext = oListItem.getBindingContext("conversation");
             const sId = oBindingContext.getProperty("id");
             this.navigateTo({ sViewName: "ChatMessageHistory", sId });
         },
 
-        onChatCreate: function () {
+        onChatCreate: async function () {
             this.getOwnerComponent().getRouter().navTo("Chat");
+            const { body: oBody, error: oError } = await models.read({ sService: "/chat", sPath: "/Conversation" });
+            if (oError) return MessageBox.error("Error fetching chats!");
+            this.setModel({ oModel: oBody.results, sModelName: "conversation" });
         },
 
         onChatDelete: function (oEvent) {
             const oListItem = oEvent.getParameter("listItem");
             const sId = oListItem.getBindingContext("conversation").getProperty("id");
+            const sTitle = oListItem.getBindingContext("conversation").getProperty("title");
             MessageBox.warning(
-                "Are you sure you want to delete this conversation?", {
+                `This will delete: ${sTitle}`, {
                 icon: MessageBox.Icon.WARNING,
                 title: "Delete Chat?",
                 actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
@@ -41,8 +44,9 @@ sap.ui.define([
                     if (sAction !== MessageBox.Action.OK) return;
                     const { error: oRemoveError } = await models.remove({ sService: "/chat", sPath: `/Conversation/${sId}` });
                     oRemoveError
-                        ? MessageBox.error("Error fetching chats!")
+                        ? MessageBox.error("Error deleting chat!")
                         : MessageToast.show("Chat deleted successfully!");
+                    this.getOwnerComponent().getRouter().navTo("Chat");
                     const { body: oBody, error: oReadError } = await models.read({ sService: "/chat", sPath: "/Conversation" });
                     if (oReadError) {
                         this.setModel({ oModel: [], sModelName: "conversation" });
