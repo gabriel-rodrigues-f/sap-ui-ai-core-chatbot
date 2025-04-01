@@ -3,7 +3,7 @@ sap.ui.define(["sap/ui/model/odata/v2/ODataModel"], function (ODataModel) {
 
     return {
         _getODataModel: async sService => {
-            const oDataModel = new ODataModel(`/odata/v2${sService}`, { defaultUpdateMethod: "PUT", useBatch: false })
+            const oDataModel = new ODataModel(`/odata/v2${sService}`, { useBatch: false })
             return new Promise(function (resolve, reject) {
                 oDataModel.attachMetadataLoaded(_ => resolve(oDataModel))
                 oDataModel.attachMetadataFailed(_ => reject(new Error("It was not possible to read the metadata")));

@@ -25,7 +25,7 @@ sap.ui.define([
                     sService,
                     sPath,
                     oOptions
-                })
+                });
             },
 
             remove: async function ({ sService, sPath }) {
@@ -33,7 +33,7 @@ sap.ui.define([
                     sMethod: remove,
                     sService,
                     sPath
-                })
+                });
             },
 
             create: async function ({ sService, sPath, oBody }) {
@@ -42,7 +42,7 @@ sap.ui.define([
                     sService,
                     sPath,
                     oBody
-                })
+                });
             },
 
             update: async function ({ sService, sPath, oBody }) {
@@ -51,7 +51,7 @@ sap.ui.define([
                     sService,
                     sPath,
                     oBody
-                })
+                });
             },
 
             environment: {
