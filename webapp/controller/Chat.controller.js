@@ -16,9 +16,7 @@ sap.ui.define([
 
         onInit: async function () {
             this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
-            const oComponent = this.getOwnerComponent();
-            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
-            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
             oRouter.getRoute("Chat").attachPatternMatched(this._clearMessages, this);
@@ -35,11 +33,11 @@ sap.ui.define([
             this._setEnableTextArea(false);
             const sMessage = oEvent.getParameter("value");
             this._appendMessage({ role: "user", content: sMessage, createdAt: new Date().toISOString() })
-            const { email: sEmail } = await this._getCurrentUser();
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             const { body: oBody, error: oError } = await models.create({
                 sService: "/chat",
                 sPath: "/startConversation",
-                oBody: { user: sEmail, content: sMessage }
+                oBody: { user: oUser.email, content: sMessage }
             });
             if (oError) {
                 this._setBusy(false);

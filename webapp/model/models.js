@@ -55,10 +55,12 @@ sap.ui.define([
             },
 
             environment: {
-                getCurrentUser: async function ({ sPath }) {
+                getCurrentUser: async function ({ oContext }) {
+                    const oComponent = oContext.getOwnerComponent();
+                    const sURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
                     return await fetchAdapter.adaptRequest({
                         sMethod: "GET",
-                        sPath,
+                        sPath: sURI,
                     });
                 },
             },

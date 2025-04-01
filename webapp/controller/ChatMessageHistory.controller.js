@@ -15,9 +15,7 @@ sap.ui.define([
         },
 
         onInit: async function () {
-            const oComponent = this.getOwnerComponent();
-            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
-            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
             oRouter.getRoute("ChatMessageHistory").attachPatternMatched(this._onRouteMatched, this);

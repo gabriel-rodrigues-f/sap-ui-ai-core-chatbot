@@ -9,9 +9,7 @@ sap.ui.define([
     return BaseController.extend("com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatHistory", {
 
         onInit: async function () {
-            const oComponent = this.getOwnerComponent();
-            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
-            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             const { body: oBody, error: oError } = await models.read({
                 sService: "/chat",
                 sPath: "/Conversation",
