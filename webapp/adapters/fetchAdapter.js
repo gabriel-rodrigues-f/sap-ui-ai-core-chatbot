@@ -1,6 +1,5 @@
 sap.ui.define([], function () {
-
-    "use strict"
+    "use strict";
 
     return {
         adaptRequest: async function ({
@@ -33,8 +32,8 @@ sap.ui.define([], function () {
             } catch (error) {
                 return {
                     error: error.message || "Erro inesperado"
-                }
-            }
+                };
+            };
         }
-    }
-})
+    };
+});
