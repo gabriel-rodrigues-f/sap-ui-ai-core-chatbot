@@ -32,7 +32,7 @@ sap.ui.define([
             this._setBusy(true);
             this._setEnableTextArea(false);
             const sMessage = oEvent.getParameter("value");
-            this._appendMessage({ role: "user", content: sMessage, createdAt: new Date().toISOString() })
+            this._appendMessage({ role: "user", content: sMessage, createdAt: new Date() })
             const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             const { body: oBody, error: oError } = await models.create({
                 sService: "/chat",
@@ -47,7 +47,7 @@ sap.ui.define([
             this._appendMessage({
                 role: "assistant",
                 content: oBody.startConversation.content,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date(),
                 icon: oBody.startConversation.icon
             })
             this._setBusy(false);

@@ -36,7 +36,7 @@ sap.ui.define([
             this._appendMessage({
                 role: "user",
                 content: sMessage,
-                createdAt: new Date().toISOString()
+                createdAt: new Date()
             })
             const { body: oBody, error: oError } = await models.create({
                 sService: "/chat",
@@ -51,7 +51,7 @@ sap.ui.define([
             this._appendMessage({
                 role: "assistant",
                 content: oBody.sendMessage.content,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date(),
                 icon: "sap-icon://da-2",
             })
             this._setBusy(false);
