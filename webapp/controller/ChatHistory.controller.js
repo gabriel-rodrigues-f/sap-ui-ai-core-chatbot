@@ -13,19 +13,6 @@ sap.ui.define([
             this.getOwnerComponent().getEventBus().subscribe("conversationHistoryLoaded", this._setConversationModel, this)
         },
 
-        _setConversationModel: async function () {
-            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
-            const { body: oBody, error: oError } = await models.read({
-                sService: "/chat",
-                sPath: "/Conversation",
-                oOptions: {
-                    urlParameters: { "$filter": `user eq '${oUser.email}'` }
-                }
-            });
-            if (oError) return MessageBox.error("Error fetching chats!");
-            this.setModel({ oModel: oBody.results, sModelName: "conversation" });
-        },
-
         onChatPress: function (oEvent) {
             const oListItem = oEvent.getParameter("listItem");
             const oBindingContext = oListItem.getBindingContext("conversation");
@@ -36,7 +23,7 @@ sap.ui.define([
         onChatCreate: async function () {
             this.getOwnerComponent().getRouter().navTo("Chat");
             const { body: oBody, error: oError } = await models.read({ sService: "/chat", sPath: "/Conversation" });
-            if (oError) return MessageBox.error("Error fetching chats!");
+            if (oError) return MessageBox.error("Error creating chats!");
             this.setModel({ oModel: oBody.results, sModelName: "conversation" });
         },
 
@@ -66,6 +53,19 @@ sap.ui.define([
                     this.setModel({ oModel: oBody.results, sModelName: "conversation" });
                 }
             });
-        }
+        },
+
+        _setConversationModel: async function () {
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
+            const { body: oBody, error: oError } = await models.read({
+                sService: "/chat",
+                sPath: "/Conversation",
+                oOptions: {
+                    urlParameters: { "$filter": `user eq '${oUser.email}'` }
+                }
+            });
+            if (oError) return MessageBox.error("Error fetching chats!");
+            this.setModel({ oModel: oBody.results, sModelName: "conversation" });
+        },
     });
 });

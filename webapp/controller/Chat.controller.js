@@ -57,15 +57,15 @@ sap.ui.define([
         },
  
         _clearMessages: function () {
-            this.setProperty({ sModel: "chatModel", sPath: "/messages", oProperty: [] });
+            this.getView().getModel("chatModel").setProperty("/messages", []);
         },
 
         _setBusy: function (bIsBusy) {
-            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
+            this.getView().getModel("chatModel").setProperty("/isBusy", bIsBusy);
         },
 
         _setEnableTextArea: function (sIsEnabled) {
-            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: sIsEnabled });
+            this.getView().getModel("chatModel").setProperty("/enableTextArea", sIsEnabled);
         },
 
         _appendMessage: function (oMessage) {

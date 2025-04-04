@@ -85,11 +85,11 @@ sap.ui.define([
         },
 
         _setBusy: function (bIsBusy) {
-            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
+            this.getView().getModel("chatModel").setProperty("/isBusy", bIsBusy);
         },
 
-        _setEnableTextArea: function (bIsEnabled) {
-            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: bIsEnabled });
-        }
+        _setEnableTextArea: function (sIsEnabled) {
+            this.getView().getModel("chatModel").setProperty("/enableTextArea", sIsEnabled);
+        },
     });
 });

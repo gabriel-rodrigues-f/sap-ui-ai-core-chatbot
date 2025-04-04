@@ -22,10 +22,6 @@ sap.ui.define(
           return this.getView().getModel(sModelName).getProperty(sPath);
         },
 
-        setProperty({ sModelName, sPath, oProperty }) {
-          return this.getView().getModel(sModelName).setProperty(sPath, oProperty);
-        },
-
         navigateTo({ sViewName, sId }) {
           const oRouter = UIComponent.getRouterFor(this);
           oRouter.navTo(sViewName, { id: sId });
