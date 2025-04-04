@@ -27,18 +27,12 @@ jobs:
         with:
           node-version: '18'
 
-      - name: 📦 Install WGET
-        run: |
-          sudo apt-get install -y wget
-
       - name: 📦 Install Dependencies
         run: npm install
         
       - name: 📥 Install MTA Build Tool (MBT)
         run: |
-          wget https://github.com/SAP/cloud-mta-build-tool/releases/download/v1.3.16/mbt-linux-x64
-          chmod +x mbt-linux-x64
-          sudo mv mbt-linux-x64 /usr/local/bin/mbt
+          npm install -g mbt
 
       - name: 🛠️ Build MTA
         id: build
