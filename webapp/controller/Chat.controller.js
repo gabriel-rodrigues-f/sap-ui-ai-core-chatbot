@@ -52,7 +52,7 @@ sap.ui.define([
             })
             this._setBusy(false);
             this._setEnableTextArea(true);
-            this.navigateTo({ sViewName: "ChatHistory", sId: oBody.startConversation.conversationId });
+            this.getOwnerComponent().getEventBus().publish("conversationHistoryLoaded");
             this.navigateTo({ sViewName: "ChatMessageHistory", sId: oBody.startConversation.conversationId });
         },
  

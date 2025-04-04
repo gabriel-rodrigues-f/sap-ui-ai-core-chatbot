@@ -8,7 +8,12 @@ sap.ui.define([
 
     return BaseController.extend("com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatHistory", {
 
-        onInit: async function () {
+        onInit: function () {
+            this._setConversationModel()
+            this.getOwnerComponent().getEventBus().subscribe("conversationHistoryLoaded", this._setConversationModel, this)
+        },
+
+        _setConversationModel: async function () {
             const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             const { body: oBody, error: oError } = await models.read({
                 sService: "/chat",
@@ -16,7 +21,6 @@ sap.ui.define([
                 oOptions: {
                     urlParameters: { "$filter": `user eq '${oUser.email}'` }
                 }
-
             });
             if (oError) return MessageBox.error("Error fetching chats!");
             this.setModel({ oModel: oBody.results, sModelName: "conversation" });
@@ -58,7 +62,7 @@ sap.ui.define([
                     if (oReadError) {
                         this.setModel({ oModel: [], sModelName: "conversation" });
                         return MessageBox.error("Error fetching chats!");
-                    }
+                    };
                     this.setModel({ oModel: oBody.results, sModelName: "conversation" });
                 }
             });

@@ -73,7 +73,6 @@ sap.ui.define([
                 ...oMessage,
                 icon: oMessage.role === "assistant" ? "sap-icon://da-2" : undefined
             }));
-
             const oChatModel = { conversationId, messages: aMessages };
             this.setModel({ oModel: oChatModel, sModelName: "chatModel" });
         },
