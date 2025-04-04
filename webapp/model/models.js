@@ -25,7 +25,7 @@ sap.ui.define([
                     sService,
                     sPath,
                     oOptions
-                })
+                });
             },
 
             remove: async function ({ sService, sPath }) {
@@ -33,7 +33,7 @@ sap.ui.define([
                     sMethod: remove,
                     sService,
                     sPath
-                })
+                });
             },
 
             create: async function ({ sService, sPath, oBody }) {
@@ -42,7 +42,7 @@ sap.ui.define([
                     sService,
                     sPath,
                     oBody
-                })
+                });
             },
 
             update: async function ({ sService, sPath, oBody }) {
@@ -51,14 +51,16 @@ sap.ui.define([
                     sService,
                     sPath,
                     oBody
-                })
+                });
             },
 
             environment: {
-                getCurrentUser: async function ({ sPath }) {
+                getCurrentUser: async function ({ oContext }) {
+                    const oComponent = oContext.getOwnerComponent();
+                    const sURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
                     return await fetchAdapter.adaptRequest({
                         sMethod: "GET",
-                        sPath,
+                        sPath: sURI,
                     });
                 },
             },

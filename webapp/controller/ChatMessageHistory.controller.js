@@ -15,9 +15,7 @@ sap.ui.define([
         },
 
         onInit: async function () {
-            const oComponent = this.getOwnerComponent();
-            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
-            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
             oRouter.getRoute("ChatMessageHistory").attachPatternMatched(this._onRouteMatched, this);
@@ -38,7 +36,7 @@ sap.ui.define([
             this._appendMessage({
                 role: "user",
                 content: sMessage,
-                createdAt: new Date().toISOString()
+                createdAt: new Date()
             })
             const { body: oBody, error: oError } = await models.create({
                 sService: "/chat",
@@ -53,7 +51,7 @@ sap.ui.define([
             this._appendMessage({
                 role: "assistant",
                 content: oBody.sendMessage.content,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date(),
                 icon: "sap-icon://da-2",
             })
             this._setBusy(false);
@@ -71,12 +69,10 @@ sap.ui.define([
                 this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
                 return MessageBox.error("Unexpected Error!");
             };
-
             const aMessages = oBody.messages.results.map(oMessage => ({
                 ...oMessage,
                 icon: oMessage.role === "assistant" ? "sap-icon://da-2" : undefined
             }));
-
             const oChatModel = { conversationId, messages: aMessages };
             this.setModel({ oModel: oChatModel, sModelName: "chatModel" });
         },
@@ -89,11 +85,11 @@ sap.ui.define([
         },
 
         _setBusy: function (bIsBusy) {
-            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
+            this.getView().getModel("chatModel").setProperty("/isBusy", bIsBusy);
         },
 
-        _setEnableTextArea: function (bIsEnabled) {
-            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: bIsEnabled });
-        }
+        _setEnableTextArea: function (sIsEnabled) {
+            this.getView().getModel("chatModel").setProperty("/enableTextArea", sIsEnabled);
+        },
     });
 });

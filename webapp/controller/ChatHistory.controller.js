@@ -8,20 +8,9 @@ sap.ui.define([
 
     return BaseController.extend("com.lab2dev.uichatbotaigabrielmarangoni.controller.ChatHistory", {
 
-        onInit: async function () {
-            const oComponent = this.getOwnerComponent();
-            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
-            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
-            const { body: oBody, error: oError } = await models.read({
-                sService: "/chat",
-                sPath: "/Conversation",
-                oOptions: {
-                    urlParameters: { "$filter": `user eq '${oUser.email}'` }
-                }
-
-            });
-            if (oError) return MessageBox.error("Error fetching chats!");
-            this.setModel({ oModel: oBody.results, sModelName: "conversation" });
+        onInit: function () {
+            this._setConversationModel()
+            this.getOwnerComponent().getEventBus().subscribe("conversationHistoryLoaded", this._setConversationModel, this)
         },
 
         onChatPress: function (oEvent) {
@@ -34,7 +23,7 @@ sap.ui.define([
         onChatCreate: async function () {
             this.getOwnerComponent().getRouter().navTo("Chat");
             const { body: oBody, error: oError } = await models.read({ sService: "/chat", sPath: "/Conversation" });
-            if (oError) return MessageBox.error("Error fetching chats!");
+            if (oError) return MessageBox.error("Error creating chats!");
             this.setModel({ oModel: oBody.results, sModelName: "conversation" });
         },
 
@@ -60,10 +49,23 @@ sap.ui.define([
                     if (oReadError) {
                         this.setModel({ oModel: [], sModelName: "conversation" });
                         return MessageBox.error("Error fetching chats!");
-                    }
+                    };
                     this.setModel({ oModel: oBody.results, sModelName: "conversation" });
                 }
             });
-        }
+        },
+
+        _setConversationModel: async function () {
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
+            const { body: oBody, error: oError } = await models.read({
+                sService: "/chat",
+                sPath: "/Conversation",
+                oOptions: {
+                    urlParameters: { "$filter": `user eq '${oUser.email}'` }
+                }
+            });
+            if (oError) return MessageBox.error("Error fetching chats!");
+            this.setModel({ oModel: oBody.results, sModelName: "conversation" });
+        },
     });
 });

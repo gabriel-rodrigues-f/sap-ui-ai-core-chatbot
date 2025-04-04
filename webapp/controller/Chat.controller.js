@@ -16,9 +16,7 @@ sap.ui.define([
 
         onInit: async function () {
             this.setModel({ oModel: this._oChat, sModelName: "chatModel" });
-            const oComponent = this.getOwnerComponent();
-            const sResolvedURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
-            const { body: oUser } = await models.environment.getCurrentUser({ sPath: sResolvedURI });
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             this.setModel({ oModel: oUser, sModelName: "currentUserModel" });
             const oRouter = UIComponent.getRouterFor(this);
             oRouter.getRoute("Chat").attachPatternMatched(this._clearMessages, this);
@@ -34,12 +32,12 @@ sap.ui.define([
             this._setBusy(true);
             this._setEnableTextArea(false);
             const sMessage = oEvent.getParameter("value");
-            this._appendMessage({ role: "user", content: sMessage, createdAt: new Date().toISOString() })
-            const { email: sEmail } = await this._getCurrentUser();
+            this._appendMessage({ role: "user", content: sMessage, createdAt: new Date() })
+            const { body: oUser } = await models.environment.getCurrentUser({ oContext: this });
             const { body: oBody, error: oError } = await models.create({
                 sService: "/chat",
                 sPath: "/startConversation",
-                oBody: { user: sEmail, content: sMessage }
+                oBody: { user: oUser.email, content: sMessage }
             });
             if (oError) {
                 this._setBusy(false);
@@ -49,25 +47,25 @@ sap.ui.define([
             this._appendMessage({
                 role: "assistant",
                 content: oBody.startConversation.content,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date(),
                 icon: oBody.startConversation.icon
             })
             this._setBusy(false);
             this._setEnableTextArea(true);
-            this.navigateTo({ sViewName: "ChatHistory", sId: oBody.startConversation.conversationId });
+            this.getOwnerComponent().getEventBus().publish("conversationHistoryLoaded");
             this.navigateTo({ sViewName: "ChatMessageHistory", sId: oBody.startConversation.conversationId });
         },
  
         _clearMessages: function () {
-            this.setProperty({ sModel: "chatModel", sPath: "/messages", oProperty: [] });
+            this.getView().getModel("chatModel").setProperty("/messages", []);
         },
 
         _setBusy: function (bIsBusy) {
-            this.setProperty({ sModel: "chatModel", sPath: "/isBusy", oProperty: bIsBusy });
+            this.getView().getModel("chatModel").setProperty("/isBusy", bIsBusy);
         },
 
         _setEnableTextArea: function (sIsEnabled) {
-            this.setProperty({ sModel: "chatModel", sPath: "/enableTextArea", oProperty: sIsEnabled });
+            this.getView().getModel("chatModel").setProperty("/enableTextArea", sIsEnabled);
         },
 
         _appendMessage: function (oMessage) {
