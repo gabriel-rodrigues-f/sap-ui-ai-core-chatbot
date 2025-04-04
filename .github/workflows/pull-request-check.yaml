@@ -31,17 +31,14 @@ jobs:
         run: |
           sudo apt-get install -y wget
 
-      - name: Install Cloud Foundry CLI
-        run: |
-          # Install Cloud Foundry CLI
-          wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
-          echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-          sudo apt-get update
-          sudo apt-get install -y cf8-cli
-          cf install-plugin -f https://github.com/cloudfoundry-incubator/multiapps-cli-plugin/releases/latest/download/multiapps-plugin.linux64
-
       - name: 📦 Install Dependencies
         run: npm install
+        
+      - name: 📥 Install MTA Build Tool (MBT)
+        run: |
+          wget https://github.com/SAP/cloud-mta-build-tool/releases/download/v1.3.16/mbt-linux-x64
+          chmod +x mbt-linux-x64
+          sudo mv mbt-linux-x64 /usr/local/bin/mbt
 
       - name: 🛠️ Build MTA
         id: build
