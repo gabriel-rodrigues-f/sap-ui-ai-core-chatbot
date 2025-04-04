@@ -30,9 +30,7 @@
                         id="_IDGenFeedListItem1"
                         class="feedListItem"
                         convertLinksToAnchorTags="All"
-                        info="{chatModel>role}"
                         text="{chatModel>content}"
-                        timestamp="{chatModel>createdAt}"
                         icon="{chatModel>icon}"
                         iconInitials="{chatModel>initials}"
                         showIcon="true">
