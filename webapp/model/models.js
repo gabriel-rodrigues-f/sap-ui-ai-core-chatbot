@@ -2,9 +2,10 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/ui/Device",
     "com/lab2dev/uichatbotaigabrielmarangoni/adapters/ODataV2Adapter",
+    "com/lab2dev/uichatbotaigabrielmarangoni/adapters/fetchAdapter",
     "com/lab2dev/uichatbotaigabrielmarangoni/model/methods",
 ],
-    function (JSONModel, Device, ODataV2Adapter, methods) {
+    function (JSONModel, Device, ODataV2Adapter, fetchAdapter, methods) {
         "use strict";
         const { read, update, create, remove } = methods;
         return {
@@ -24,7 +25,7 @@ sap.ui.define([
                     sService,
                     sPath,
                     oOptions
-                })
+                });
             },
 
             remove: async function ({ sService, sPath }) {
@@ -32,7 +33,7 @@ sap.ui.define([
                     sMethod: remove,
                     sService,
                     sPath
-                })
+                });
             },
 
             create: async function ({ sService, sPath, oBody }) {
@@ -41,7 +42,7 @@ sap.ui.define([
                     sService,
                     sPath,
                     oBody
-                })
+                });
             },
 
             update: async function ({ sService, sPath, oBody }) {
@@ -50,7 +51,18 @@ sap.ui.define([
                     sService,
                     sPath,
                     oBody
-                })
-            }
+                });
+            },
+
+            environment: {
+                getCurrentUser: async function ({ oContext }) {
+                    const oComponent = oContext.getOwnerComponent();
+                    const sURI = oComponent.getManifestObject().resolveUri('user-api/currentUser');
+                    return await fetchAdapter.adaptRequest({
+                        sMethod: "GET",
+                        sPath: sURI,
+                    });
+                },
+            },
         };
     });

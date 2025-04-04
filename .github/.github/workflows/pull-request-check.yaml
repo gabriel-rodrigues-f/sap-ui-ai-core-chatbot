@@ -1,0 +1,54 @@
+name: 🛠️ UI5 Build Check
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main
+      - qa
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  health_check:
+    name: 🔍 Validate Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🌐 Setup Node.js Environment
+        uses: actions/setup-node@v4.2.0
+        with:
+          node-version: '18'
+
+      - name: 📦 Install Dependencies
+        run: npm install
+
+      - name: 🛠️ Build UI5 Application
+        run: |
+          npm run build
+        continue-on-error: false
+
+      - name: ✅ Build Passed - PR Approved for Merge
+        if: success()
+        uses: mshick/add-pr-comment@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            🎉 **Build Succeeded!**  
+            O projeto foi construído com sucesso e está pronto para revisão. ✅  
+
+      - name: ❌ Build Failed - PR Needs Fixes
+        if: failure()
+        uses: mshick/add-pr-comment@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            🚨 **Build Failed!**  
+            O projeto não pôde ser construído. Corrija os erros antes de aprovar o merge. ❌

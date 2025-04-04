@@ -1,0 +1,38 @@
+name: 🚀 Deploy Fiori UI5 Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: 🚀 Deploy Application
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🌐 Setup Node.js Environment
+        uses: actions/setup-node@v4.2.0
+        with:
+          node-version: '18'
+
+      - name: 📦 Install Dependencies
+        run: npm install
+
+      - name: 🛠️ Build MTA
+        run: |
+          mbt build -p=cf -t=artifact --mtar=artifact.mtar
+
+      - name: 🔑 Log into BTP Cloud Foundry
+        run: |
+          cf login -a ${{ secrets.BTP_CLOUD_FOUNDRY_API }} -u ${{ secrets.BTP_CLOUD_FOUNDRY_USERNAME }} -p '${{ secrets.BTP_CLOUD_FOUNDRY_PASSWORD }}' -o ${{ secrets.BTP_CLOUD_FOUNDRY_ORGANIZATION }} -s ${{ secrets.BTP_CLOUD_FOUNDRY_SPACE }}
+
+      - name: 🚀 Deploy Application
+        run: |
+          cf deploy mta_archives/artifact.mtar
+
+      - name: 🔒 Logout from BTP Cloud Foundry
+        run: |
+          cf logout

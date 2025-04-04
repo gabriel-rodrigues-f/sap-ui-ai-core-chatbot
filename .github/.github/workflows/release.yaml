@@ -1,0 +1,88 @@
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+name: 🚀 Create Release Pipeline
+
+jobs:
+  build:
+    if: github.event.pull_request.merged == true
+    name: 🛠️ Build and Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📂 Checkout code
+        uses: actions/checkout@v2
+
+      - name: ⚙️ Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 🔍 Get PR Author Info
+        id: get_pr_author
+        run: |
+          echo "username=$(jq -r '.pull_request.user.login' < ${GITHUB_EVENT_PATH})" >> $GITHUB_ENV
+          echo "useremail=$(curl -s https://api.github.com/users/$(jq -r '.pull_request.user.login' < ${GITHUB_EVENT_PATH}) | jq -r '.email')" >> $GITHUB_ENV
+
+      - name: ⚙️ Configure Git with PR author details
+        run: |
+          git config --local user.name "${{ env.username }}"
+          git config --local user.email "${{ env.useremail }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗️ Build project
+        run: npm run build
+
+      - name: 🏷️ Get Tag
+        id: get_tag
+        run: |
+          TAG_NAME=$(git describe --tags --exact-match 2>/dev/null || echo "No tag found")
+          if [ "$TAG_NAME" = "No tag found" ]; then
+            echo "No tag found, generating a new one..."
+            TAG_NAME="v$(date +'%Y%m%d%H%M%S')"
+            git tag $TAG_NAME
+            git push origin $TAG_NAME
+          fi
+          echo "Tag Name: $TAG_NAME"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_ENV
+
+      - name: 📄 Generate Release Notes
+        id: generate_notes
+        run: |
+          echo "## Changes in this Release" > release_notes.md
+          git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 @^)..@ >> release_notes.md
+
+      - name: 📦 Zip the dist folder
+        run: |
+          cd dist
+          zip -r ../${{ env.tag_name }}.zip .
+        working-directory: .
+
+      - name: 📢 Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.tag_name }}
+          release_name: "Release ${{ env.tag_name }}"
+          body_path: ./release_notes.md
+          draft: false
+          prerelease: false
+
+      - name: 📤 Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.tag_name }}.zip
+          asset_name: ${{ env.tag_name }}.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
