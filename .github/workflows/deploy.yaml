@@ -21,9 +21,11 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm install
 
-      - name: 🛠️ Build MTA
-        run: |
-          mbt build -p=cf -t=artifact --mtar=artifact.mtar
+      - name: 📥 Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ui5-mtar-artifact
+          path: mta_archives
 
       - name: 🔑 Log into BTP Cloud Foundry
         run: |

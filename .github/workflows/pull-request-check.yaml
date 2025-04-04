@@ -29,11 +29,22 @@ jobs:
 
       - name: 📦 Install Dependencies
         run: npm install
-
-      - name: 🛠️ Build UI5 Application
+        
+      - name: 📥 Install MTA Build Tool (MBT)
         run: |
-          npm run build
+          npm install -g mbt
+
+      - name: 🛠️ Build MTA
+        id: build
+        run: |
+          mbt build -p=cf -t=artifact --mtar=artifact.mtar
         continue-on-error: false
+
+      - name: 📤 Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui5-mtar-artifact
+          path: artifact/artifact.mtar
 
       - name: ✅ Build Passed - PR Approved for Merge
         if: success()
@@ -42,7 +53,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           message: |
             🎉 **Build Succeeded!**  
-            O projeto foi construído com sucesso e está pronto para revisão. ✅  
+            The project was successfully built and is ready for review. ✅  
 
       - name: ❌ Build Failed - PR Needs Fixes
         if: failure()
@@ -51,4 +62,4 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           message: |
             🚨 **Build Failed!**  
-            O projeto não pôde ser construído. Corrija os erros antes de aprovar o merge. ❌
+            The project could not be built. Please fix the errors before approving the merge. ❌  
